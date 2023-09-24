@@ -27,7 +27,7 @@ def insert(Chat_id, Cist_name, Cist_id, Chat_type, First_name, Last_name, Userna
     cursor = conn.cursor()
     cursor.execute('''INSERT INTO users (chat_id, cist_name, cist_id, chat_type, first_name, last_name, username)
           VALUES (?, ?, ?, ?, ?, ?, ?);''',
-              (Chat_id, Cist_name, int(random.uniform(1, 100000)), Chat_type, First_name, Last_name, Username))
+              (Chat_id, Cist_name, Cist_id, Chat_type, First_name, Last_name, Username))
     # Commit the changes
     conn.commit()
     # Close the database connection
@@ -48,3 +48,13 @@ def init():
        );''')
     conn.commit()
     conn.close()
+
+
+def search(Chat_id):
+    conn = sqlite3.connect('my_database.db')
+    c = conn.cursor()
+    c.execute('''SELECT cist_id FROM users WHERE chat_id = ?;''', (Chat_id,))
+    Cist_id = c.fetchone()[0]
+    conn.commit()
+    conn.close()
+    return Cist_id
