@@ -1,4 +1,6 @@
 import sqlite3
+from pprint import pprint
+
 
 def check_chat_id_exists(chat_id):
     # Підключитися до бази даних SQLite
@@ -6,11 +8,14 @@ def check_chat_id_exists(chat_id):
     cursor = conn.cursor()
 
     # Виконати запит до бази даних, щоб перевірити наявність записів за chat_id
-    cursor.execute("SELECT COUNT(*) FROM users WHERE chat_id = ?", (chat_id,))
-    count = cursor.fetchone()
-    conn.commit()
+    cursor.execute("SELECT COUNT(*) FROM users WHERE chat_id = ?", (chat_id, ))
+    count = cursor.fetchone()[0]
+    # conn.commit()
     conn.close()
-    return count;
+    if count > 0:
+        return True
+    else:
+        return False
 
 def update(Cist_name, Cist_id, Chat_type, First_name, Last_name, Username, Chat_id):
     conn = sqlite3.connect('my_database.db')  # Замініть 'your_database.db' на шлях до вашої бази даних
@@ -23,18 +28,14 @@ def update(Cist_name, Cist_id, Chat_type, First_name, Last_name, Username, Chat_
 
 
 def insert(Chat_id, Cist_name, Cist_id, Chat_type, First_name, Last_name, Username):
-    conn = sqlite3.connect('my_database.db')  # Замініть 'your_database.db' на шлях до вашої бази даних
+    conn = sqlite3.connect('my_database.db')
     cursor = conn.cursor()
     # Check if the chat type is valid
-    if Chat_type in ['private', 'group', 'supergroup']:
-        cursor.execute('''INSERT INTO users (chat_id, cist_name, cist_id, chat_type, first_name, last_name, username)
-              VALUES (?, ?, ?, ?, ?, ?, ?);''',
-                  (Chat_id, Cist_name, Cist_id, Chat_type, First_name, Last_name, Username))
+    cursor.execute('''INSERT INTO users (chat_id, cist_name, cist_id, chat_type, first_name, last_name, username)
+                            VALUES (?, ?, ?, ?, ?, ?, ?);''',
+                (Chat_id, Cist_name, Cist_id, Chat_type, First_name, Last_name, Username))
         # Commit the changes
-        conn.commit()
-    else:
-        # Print an error message
-        print(f"Invalid chat type: {Chat_type}")
+    conn.commit()
     # Close the database connection
     conn.close()
 
@@ -43,7 +44,7 @@ def init():
     c = conn.cursor()
     # Create the table if it doesn't exist
     c.execute('''CREATE TABLE IF NOT EXISTS users (
-         chat_id INTEGER,
+         chat_id INTEGER PRIMARY KEY,
          cist_name TEXT,
          cist_id INTEGER,
          chat_type TEXT,

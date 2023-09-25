@@ -1,9 +1,10 @@
 from pprint import pprint
 import telebot
+import sqlite3
 from pytz import timezone
 import datetime
 import nure_tools
-from Database import *
+import Database
 from collections import OrderedDict
 import locale
 
@@ -17,7 +18,7 @@ with open("Token", "r") as f:
 # Create a bot object with the bot token
 bot = telebot.TeleBot(bot_token)
 
-init()
+Database.init()
 def greet_user(messages):
     for message in messages:
         if (message.new_chat_members != None):
@@ -42,13 +43,14 @@ def greet_user(messages):
                                             "<b>УВАГА!</b> Якщо ви зробите запит на розклад вперше за добу - то підготовка розкладу буде тривати " +
                                             " приблизно 11 секунд. Подякувати за це можете розробникам CISTу.", parse_mode=parse_mode, disable_web_page_preview=True)
 bot.set_update_listener(greet_user)
+
 @bot.message_handler(commands=['choose'])
 def register(message):
     x = message.text.split()
     if (len(x) == 2):
         Cist_name = x[1]
         Cist_id = nure_tools.find_group(Cist_name)["id"]
-        Chat_id = abs(message.chat.id)
+        Chat_id = message.chat.id
         Chat_type = message.chat.type
         if (Chat_type == 'private'):
             First_name = message.chat.first_name
@@ -58,12 +60,10 @@ def register(message):
             First_name = message.chat.title
             Last_name = None
             Username = message.chat.username
-        if (check_chat_id_exists(message.chat.id)):
-            update(Cist_name, Cist_id, Chat_type, First_name, Last_name, Username, Chat_id)
+        if (Database.check_chat_id_exists(message.chat.id)):
+            Database.update(Cist_name, Cist_id, Chat_type, First_name, Last_name, Username, Chat_id)
         else:
-            insert(Chat_id, Cist_name, Cist_id, Chat_type, First_name, Last_name, Username)
-        text = str(Chat_id) + ' ' + str(Cist_name) + ' ' + str(Cist_id) + ' ' + str(Chat_type) + ' ' + str(First_name) + ' ' + str(Last_name) + ' ' + str(Username)
-        pprint(text)
+            Database.insert(Chat_id, Cist_name, Cist_id, Chat_type, First_name, Last_name, Username)
         bot.reply_to(message, f"Дякую {message.from_user.first_name} за реєстрацію")
     else:
         bot.reply_to(message, f"Sorry, not valid input. Please, try again")
@@ -78,7 +78,7 @@ def day(message):
     today = datetime.datetime(today.year, today.month, today.day)
     today_str = today.strftime("%Y-%m-%d %H:%m")
     end_str = (today + datetime.timedelta(days=1)).strftime("%Y-%m-%d %H:%m")
-    Cist_id = search(message.chat.id)
+    Cist_id = Database.search(message.chat.id)
     # Get the Unix timestamp of the day in Kyiv time
     Schedule = nure_tools.get_schedule('group',
                                        Cist_id,
@@ -117,7 +117,7 @@ def next_day(message):
     tommorow = datetime.datetime(today.year, today.month, today.day) + datetime.timedelta(days=1)
     tommorow_str = tommorow.strftime("%Y-%m-%d %H:%m")
     end_str = (tommorow + datetime.timedelta(days=1)).strftime("%Y-%m-%d %H:%m")
-    Cist_id = search(message.chat.id)
+    Cist_id = Database.search(message.chat.id)
     # Get the Unix timestamp of the day in Kyiv time
     Schedule = nure_tools.get_schedule('group',
                                        Cist_id,
@@ -157,7 +157,7 @@ def week(message):
     monday = current_day - datetime.timedelta(days=current_day.weekday())
     # Get the week number
     week_num = monday.isocalendar()[1]
-    Cist_id = search(message.chat.id)
+    Cist_id = Database.search(message.chat.id)
     # Create a string to store the week number and day names, dates, and Unix timestamps in Kyiv time
     week_str = f"Розклад {monday.strftime('%d.%m')} - {(monday + datetime.timedelta(days=6)).strftime('%d.%m')} ({week_num}) :\n\n"
     for i in range(6):
@@ -180,7 +180,7 @@ def week(message):
                                            )
         Schedule = list(OrderedDict(((schedule['number_pair'],
                                       schedule['teachers'][0]['id'] if schedule['teachers'] else 'no_teacher'),
-                                     schedule) for schedule in Schedule).values())
+                                      schedule) for schedule in Schedule).values())
         Schedule.sort(key=lambda lesson: lesson['start_time'])
         # Add the date and the name of the day in Ukrainian with a capital letter and the first format
         day_text = f'{date_format} ({day_name_uk})\n'
@@ -211,7 +211,7 @@ def Next_week(message):
     next_monday = KYIV.localize(datetime.datetime.now()) + datetime.timedelta(days=7)
     # Get the week number
     week_num = next_monday.isocalendar()[1]
-    Cist_id = search(message.chat.id)
+    Cist_id = Database.search(message.chat.id)
     # Create a string to store the week number and day names, dates, and Unix timestamps in Kyiv time
     week_str = f"Розклад {next_monday.strftime('%d.%m')} - {(next_monday + datetime.timedelta(days=6)).strftime('%d.%m')} ({week_num}) :\n\n"
     for i in range(6):
