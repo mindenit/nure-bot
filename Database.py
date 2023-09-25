@@ -25,11 +25,16 @@ def update(Cist_name, Cist_id, Chat_type, First_name, Last_name, Username, Chat_
 def insert(Chat_id, Cist_name, Cist_id, Chat_type, First_name, Last_name, Username):
     conn = sqlite3.connect('my_database.db')  # Замініть 'your_database.db' на шлях до вашої бази даних
     cursor = conn.cursor()
-    cursor.execute('''INSERT INTO users (chat_id, cist_name, cist_id, chat_type, first_name, last_name, username)
-          VALUES (?, ?, ?, ?, ?, ?, ?);''',
-              (Chat_id, Cist_name, Cist_id, Chat_type, First_name, Last_name, Username))
-    # Commit the changes
-    conn.commit()
+    # Check if the chat type is valid
+    if Chat_type in ['private', 'group', 'supergroup']:
+        cursor.execute('''INSERT INTO users (chat_id, cist_name, cist_id, chat_type, first_name, last_name, username)
+              VALUES (?, ?, ?, ?, ?, ?, ?);''',
+                  (Chat_id, Cist_name, Cist_id, Chat_type, First_name, Last_name, Username))
+        # Commit the changes
+        conn.commit()
+    else:
+        # Print an error message
+        print(f"Invalid chat type: {Chat_type}")
     # Close the database connection
     conn.close()
 
@@ -38,7 +43,7 @@ def init():
     c = conn.cursor()
     # Create the table if it doesn't exist
     c.execute('''CREATE TABLE IF NOT EXISTS users (
-         chat_id INTEGER PRIMARY KEY AUTOINCREMENT,
+         chat_id INTEGER,
          cist_name TEXT,
          cist_id INTEGER,
          chat_type TEXT,
