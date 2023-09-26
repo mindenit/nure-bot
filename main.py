@@ -21,51 +21,63 @@ bot = telebot.TeleBot(bot_token)
 
 
 @bot.message_handler(commands=['notify'])
-def notify (message):
+def notify(message):
     # Get all the chat ids from the bot
-    text = message.text
-    text = text.replace('/notify', '')
-    chat_ids = []
-    # Connect to the sqlite3 database
-    conn = sqlite3.connect('my_database.db')
-    # Create a cursor object
-    c = conn.cursor()
-    # Execute a query to get all the chat ids from the users table
-    c.execute('SELECT chat_id FROM users')
-    # Fetch all the results and append them to the chat_ids list
-    for row in c.fetchall():
-        chat_ids.append(row[0])
-    # Close the connection
-    conn.close()
-    # Loop through the chat ids and send the message
-    for chat_id in chat_ids:
-        time.sleep(1)
-        bot.send_message(chat_id, text)
+    with open("Admin_id", "r") as f:
+        digits = f.read().splitlines()
+    if str(message.chat.id) in digits:
+        text = message.text
+        text = text.replace('/notify ', '')
+        chat_ids = []
+        # Connect to the sqlite3 database
+        conn = sqlite3.connect('my_database.db')
+        # Create a cursor object
+        c = conn.cursor()
+        # Execute a query to get all the chat ids from the users table
+        c.execute('SELECT chat_id FROM users')
+        # Fetch all the results and append them to the chat_ids list
+        for row in c.fetchall():
+            chat_ids.append(row[0])
+        #Close the connection
+        conn.close()
+        # Loop through the chat ids and send the message
+        for chat_id in chat_ids:
+            time.sleep(1)
+            bot.send_message(chat_id, text)
+        else:
+            bot.reply_to(message, "Вибачте, у вас нема доступу до цієї команди")
 
 
 Database.init()
+
+
 def greet_user(messages):
     for message in messages:
         if (message.new_chat_members != None):
             for new_member in message.new_chat_members:
                 if (new_member.id == bot.get_me().id):
                     parse_mode = 'html'
-                    bot.reply_to(message.chat.id, f"Цей бот має низку команд, за допомогою яких ви можете отримати розклад для себе, " +
-                                            "і своєї групи. Нижче буде список цих команд, із коротким описом, і прикладом. \n \n" +
-                                            "Список команд бота: \n \n" +
-                                            "\t <code>/choose group</code> - зміна групи у чаті, замість group треба написати назву вашої групи. " +
-                                            "Наприклад: <code>/choose КІУКІ-22-7</code>, <code>/choose кіукі-22-7</code> і тд.\nУвага! Назву групи бот розуміє лише " +
-                                            "якщо та була введена українською, через те шо він звіряє назву із реєстром на сайті cist.nure.ua." +
-                                            " Якщо у вас виникла помилка зміни групи, перевірте щоб назва була українською мовою, " +
-                                            "і відповідала тій що на cist.nure.ua. \n" +
-                                            "\t <code>/help</code> - вам відправиться це повідомлення. \n" +
-                                            "\t <code>/info</code> - вам відправиться інформація про цей чат із бази даних, якщо запис існує. \n" +
-                                            "\t <code>/day</code> -  вам відправиться розклад для вашої групи на поточний день. \n" +
-                                            "\t <code>/week</code> - вам відправиться розклад для вашої групи на поточний тиждень. " +
-                                            "У неділю ця команда вам відправить розклад вже на наступний тиждень. \n" +
-                                            "\t <code>/next_day</code> - відправляє розклад на наступний день. \n" +
-                                            "\t <code>/next_week</code> - відправить розклад на наступний тиждень. \n \n", parse_mode=parse_mode, disable_web_page_preview=True)
+                    bot.reply_to(message.chat.id,
+                                 f"Цей бот має низку команд, за допомогою яких ви можете отримати розклад для себе, " +
+                                 "і своєї групи. Нижче буде список цих команд, із коротким описом, і прикладом. \n \n" +
+                                 "Список команд бота: \n \n" +
+                                 "\t <code>/choose group</code> - зміна групи у чаті, замість group треба написати назву вашої групи. " +
+                                 "Наприклад: <code>/choose КІУКІ-22-7</code>, <code>/choose кіукі-22-7</code> і тд.\nУвага! Назву групи бот розуміє лише " +
+                                 "якщо та була введена українською, через те шо він звіряє назву із реєстром на сайті cist.nure.ua." +
+                                 " Якщо у вас виникла помилка зміни групи, перевірте щоб назва була українською мовою, " +
+                                 "і відповідала тій що на cist.nure.ua. \n" +
+                                 "\t <code>/help</code> - вам відправиться це повідомлення. \n" +
+                                 "\t <code>/info</code> - вам відправиться інформація про цей чат із бази даних, якщо запис існує. \n" +
+                                 "\t <code>/day</code> -  вам відправиться розклад для вашої групи на поточний день. \n" +
+                                 "\t <code>/week</code> - вам відправиться розклад для вашої групи на поточний тиждень. " +
+                                 "У неділю ця команда вам відправить розклад вже на наступний тиждень. \n" +
+                                 "\t <code>/next_day</code> - відправляє розклад на наступний день. \n" +
+                                 "\t <code>/next_week</code> - відправить розклад на наступний тиждень. \n \n",
+                                 parse_mode=parse_mode, disable_web_page_preview=True)
+
+
 bot.set_update_listener(greet_user)
+
 
 @bot.message_handler(commands=['statistics'])
 def statistics(message):
@@ -77,6 +89,8 @@ def statistics(message):
         bot.send_document(message.chat.id, open('my_database.db', 'rb'), caption="Database for extreme situation")
     else:
         bot.reply_to(message, "Вибачте, у вас нема доступу до цієї команди")
+
+
 @bot.message_handler(commands=['help'])
 def help(message):
     parse_mode = 'html'
@@ -93,8 +107,10 @@ def help(message):
                      "\t <code>/week</code> - вам відправиться розклад для вашої групи на поточний тиждень. " +
                      "У неділю ця команда вам відправить розклад вже на наступний тиждень. \n" +
                      "\t <code>/next_day</code> - відправляє розклад на наступний день. \n" +
-                     "\t <code>/next_week</code> - відправить розклад на наступний тиждень. \n \n", parse_mode=parse_mode,
+                     "\t <code>/next_week</code> - відправить розклад на наступний тиждень. \n \n",
+                     parse_mode=parse_mode,
                      disable_web_page_preview=True)
+
 
 @bot.message_handler(commands=['choose'])
 def register(message):
@@ -182,7 +198,7 @@ def next_day(message):
     Schedule.sort(key=lambda lesson: lesson['start_time'])
     tommorow_text = ''
     for event in Schedule:
-        #pprint(event)
+        # pprint(event)
         Start_time = datetime.datetime.fromtimestamp(int(event["start_time"])).astimezone(KYIV)
         End_time = datetime.datetime.fromtimestamp(int(event["end_time"])).astimezone(KYIV)
         Brief = event["subject"]["brief"]
@@ -232,12 +248,12 @@ def week(message):
                                            )
         Schedule = list(OrderedDict(((schedule['number_pair'],
                                       schedule['teachers'][0]['id'] if schedule['teachers'] else 'no_teacher'),
-                                      schedule) for schedule in Schedule).values())
+                                     schedule) for schedule in Schedule).values())
         Schedule.sort(key=lambda lesson: lesson['start_time'])
         # Add the date and the name of the day in Ukrainian with a capital letter and the first format
         day_text = f'{date_format} ({day_name_uk})\n'
         for event in Schedule:
-            #pprint(event)
+            # pprint(event)
             Start_time = datetime.datetime.fromtimestamp(int(event["start_time"])).astimezone(KYIV)
             End_time = datetime.datetime.fromtimestamp(int(event["end_time"])).astimezone(KYIV)
             Brief = event["subject"]["brief"]
@@ -255,6 +271,7 @@ def week(message):
     parse_mode = 'html'
     # Send the week string as a reply to the user
     bot.reply_to(message, week_str, parse_mode=parse_mode, disable_web_page_preview=True)
+
 
 @bot.message_handler(commands=['next_week'])
 def Next_week(message):
@@ -291,7 +308,7 @@ def Next_week(message):
         # Add the date and the name of the day in Ukrainian with a capital letter and the first format
         day_text = f'{date_format} ({day_name_uk})\n'
         for event in Schedule:
-            #pprint(event)
+            # pprint(event)
             Start_time = datetime.datetime.fromtimestamp(int(event["start_time"])).astimezone(KYIV)
             End_time = datetime.datetime.fromtimestamp(int(event["end_time"])).astimezone(KYIV)
             Brief = event["subject"]["brief"]
@@ -310,9 +327,11 @@ def Next_week(message):
     # Send the week string as a reply to the user
     bot.reply_to(message, week_str, parse_mode=parse_mode, disable_web_page_preview=True)
 
+
 @bot.message_handler(commands=None)
 def save_chat_id(message):
     Database.save_chat_id(message)
+
 
 # Start the bot
 bot.polling()
