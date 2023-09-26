@@ -17,6 +17,47 @@ def check_chat_id_exists(chat_id):
     else:
         return False
 
+import sqlite3
+
+def save_chat_id(message):
+    # get the chat id from the message
+    chat_id = message.chat.id
+    conn = sqlite3.connect('my_database.db')
+    c = conn.cursor()
+    # check if the chat id already exists in the table
+    c.execute("SELECT * FROM users WHERE chat_id = ?", (chat_id,))
+    result = c.fetchone()
+    if result is None:
+        c.execute("INSERT INTO users (chat_id) VALUES (?)", (chat_id,))
+        conn.commit()
+
+def count_chats():
+  """Counts the number of private and group chats in the sqlite3 database at the given path.
+
+  Args:
+    db_path: The path to the sqlite3 database.
+
+  Returns:
+    A tuple of two integers, where the first integer is the number of private chats and the second integer is the number of group chats.
+  """
+
+  # Connect to the database.
+  conn = sqlite3.connect('my_database.db')
+  c = conn.cursor()
+
+  # Count the number of private chats.
+  c.execute("SELECT COUNT(*) FROM users WHERE chat_type = 'private'")
+  num_private_chats = c.fetchone()[0]
+
+  # Count the number of group chats.
+  c.execute("SELECT COUNT(*) FROM users WHERE chat_type = 'group'")
+  num_group_chats = c.fetchone()[0]
+
+  # Close the database connection.
+  c.close()
+  conn.close()
+
+  return num_private_chats, num_group_chats
 def update(Cist_name, Cist_id, Chat_type, First_name, Last_name, Username, Chat_id):
     conn = sqlite3.connect('my_database.db')  # Замініть 'your_database.db' на шлях до вашої бази даних
     cursor = conn.cursor()

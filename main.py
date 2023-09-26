@@ -1,3 +1,4 @@
+import time
 from pprint import pprint
 import telebot
 import sqlite3
@@ -17,6 +18,30 @@ with open("Token", "r") as f:
     bot_token = f.read()
 # Create a bot object with the bot token
 bot = telebot.TeleBot(bot_token)
+
+
+@bot.message_handler(commands=['notify'])
+def notify (message):
+    # Get all the chat ids from the bot
+    text = message.text
+    text = text.replace('/notify', '')
+    chat_ids = []
+    # Connect to the sqlite3 database
+    conn = sqlite3.connect('my_database.db')
+    # Create a cursor object
+    c = conn.cursor()
+    # Execute a query to get all the chat ids from the users table
+    c.execute('SELECT chat_id FROM users')
+    # Fetch all the results and append them to the chat_ids list
+    for row in c.fetchall():
+        chat_ids.append(row[0])
+    # Close the connection
+    conn.close()
+    # Loop through the chat ids and send the message
+    for chat_id in chat_ids:
+        time.sleep(1)
+        bot.send_message(chat_id, text)
+
 
 Database.init()
 def greet_user(messages):
@@ -42,6 +67,16 @@ def greet_user(messages):
                                             "\t <code>/next_week</code> - відправить розклад на наступний тиждень. \n \n", parse_mode=parse_mode, disable_web_page_preview=True)
 bot.set_update_listener(greet_user)
 
+@bot.message_handler(commands=['statistics'])
+def statistics(message):
+    with open("Admin_id", "r") as f:
+        digits = f.read().splitlines()
+    if str(message.chat.id) in digits:
+        private, group = Database.count_chats()
+        bot.reply_to(message, f"Statistics:\nPrivate = {private}\nGroup = {group}\n ")
+        bot.send_document(message.chat.id, open('my_database.db', 'rb'), caption="Database for extreme situation")
+    else:
+        bot.reply_to(message, "Вибачте, у вас нема доступу до цієї команди")
 @bot.message_handler(commands=['help'])
 def help(message):
     parse_mode = 'html'
@@ -147,7 +182,7 @@ def next_day(message):
     Schedule.sort(key=lambda lesson: lesson['start_time'])
     tommorow_text = ''
     for event in Schedule:
-        pprint(event)
+        #pprint(event)
         Start_time = datetime.datetime.fromtimestamp(int(event["start_time"])).astimezone(KYIV)
         End_time = datetime.datetime.fromtimestamp(int(event["end_time"])).astimezone(KYIV)
         Brief = event["subject"]["brief"]
@@ -202,7 +237,7 @@ def week(message):
         # Add the date and the name of the day in Ukrainian with a capital letter and the first format
         day_text = f'{date_format} ({day_name_uk})\n'
         for event in Schedule:
-            pprint(event)
+            #pprint(event)
             Start_time = datetime.datetime.fromtimestamp(int(event["start_time"])).astimezone(KYIV)
             End_time = datetime.datetime.fromtimestamp(int(event["end_time"])).astimezone(KYIV)
             Brief = event["subject"]["brief"]
@@ -256,7 +291,7 @@ def Next_week(message):
         # Add the date and the name of the day in Ukrainian with a capital letter and the first format
         day_text = f'{date_format} ({day_name_uk})\n'
         for event in Schedule:
-            pprint(event)
+            #pprint(event)
             Start_time = datetime.datetime.fromtimestamp(int(event["start_time"])).astimezone(KYIV)
             End_time = datetime.datetime.fromtimestamp(int(event["end_time"])).astimezone(KYIV)
             Brief = event["subject"]["brief"]
@@ -274,5 +309,10 @@ def Next_week(message):
     parse_mode = 'html'
     # Send the week string as a reply to the user
     bot.reply_to(message, week_str, parse_mode=parse_mode, disable_web_page_preview=True)
+
+@bot.message_handler(commands=None)
+def save_chat_id(message):
+    Database.save_chat_id(message)
+
 # Start the bot
 bot.polling()
