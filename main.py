@@ -149,6 +149,7 @@ def help(message):
 def register(message):
     x = message.text.split()
     if (len(x) == 2):
+      try:
         Cist_name = x[1]
         Cist_id = nure_tools.find_group(Cist_name)["id"]
         Chat_id = message.chat.id
@@ -165,9 +166,11 @@ def register(message):
             Database.update(Cist_name, Cist_id, Chat_type, First_name, Last_name, Username, Chat_id)
         else:
             Database.insert(Chat_id, Cist_name, Cist_id, Chat_type, First_name, Last_name, Username)
-        bot.reply_to(message, f"Дякую {message.from_user.first_name} за реєстрацію")
+        bot.reply_to(message, f"Дякую {message.from_user.first_name} за реєстрацію, тепер у чат буде відправлятися розклад для групи {Cist_name}")
+      except:
+        bot.reply_to(message, "Сталася помилка під час реєстрації, можливо бот не знайшов вашу групу, переконайтеся у корректності введених даних,і спробуйте ще раз.")
     else:
-        bot.reply_to(message, f"Sorry, not valid input. Please, try again")
+        bot.reply_to(message, f"Неправильне використання команди, передивіться довідку (/help) і спробуйте ще раз.")
 
 
 # Define a function to handle the /day command
