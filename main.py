@@ -180,6 +180,7 @@ def day(message):
         # Get the current date in Kyiv time
         today = datetime.datetime.now().astimezone(KYIV)
         today = datetime.datetime(today.year, today.month, today.day)
+        today_text = ''
         today_str = today.strftime("%Y-%m-%d %H:%m")
         end_str = (today + datetime.timedelta(days=1)).strftime("%Y-%m-%d %H:%m")
         Cist_id = Database.search(message.chat.id)
@@ -189,31 +190,31 @@ def day(message):
                                             today_str,
                                             end_str
                                            )
-        Schedule = list(OrderedDict(((schedule['number_pair'],
-                                    schedule['teachers'][0]['id'] if schedule['teachers'] else 'no_teacher'),
-                                    schedule) for schedule in Schedule).values())
-        Schedule.sort(key=lambda lesson: lesson['start_time'])
-        today_text = ''
-        for event in Schedule:
-            # pprint(event)
-            Start_time = datetime.datetime.fromtimestamp(int(event["start_time"])).astimezone(KYIV)
-            End_time = datetime.datetime.fromtimestamp(int(event["end_time"])).astimezone(KYIV)
-            Brief = event["subject"]["brief"]
-            Type = event["type"]
-            if (len(event["teachers"]) < 1):
-                Short_name = "Не визначено"
-            else:
-                Short_name = event["teachers"][0]["short_name"]
-            today_text += f"{Start_time.strftime('%H:%M')} - {End_time.strftime('%H:%M')} | <b>{Brief} - {Type}</b> | {Short_name}\n"
-            # Send the date and Unix timestamp as a reply to the user
-            parse_mode = 'html'
+        if (isinstance(Schedule, str)):
+            today_text = 'Пар нема. Відпочивайте!\n'
+        else:
+            Schedule = list(OrderedDict(((schedule['number_pair'],
+                                        schedule['teachers'][0]['id'] if schedule['teachers'] else 'no_teacher'),
+                                        schedule) for schedule in Schedule).values())
+            Schedule.sort(key=lambda lesson: lesson['start_time'])
+            for event in Schedule:
+                # pprint(event)
+                Start_time = datetime.datetime.fromtimestamp(int(event["start_time"])).astimezone(KYIV)
+                End_time = datetime.datetime.fromtimestamp(int(event["end_time"])).astimezone(KYIV)
+                Brief = event["subject"]["brief"]
+                Type = event["type"]
+                if (len(event["teachers"]) < 1):
+                    Short_name = "Не визначено"
+                else:
+                    Short_name = event["teachers"][0]["short_name"]
+                today_text += f"{Start_time.strftime('%H:%M')} - {End_time.strftime('%H:%M')} | <b>{Brief} - {Type}</b> | {Short_name}\n"
             if (today_text == ''):
                 today_text = 'Пар нема. Відпочивайте!\n'
-            bot.reply_to(message, f"Розклад на {today.strftime('%d.%m.%Y')}\n{today_text} {DonateHTML} ", parse_mode=parse_mode,
-            disable_web_page_preview=True)
+        parse_mode = 'html'
+        bot.reply_to(message, f"Розклад на {today.strftime('%d.%m.%Y')}\n{today_text} {DonateHTML} ", parse_mode=parse_mode,
+        disable_web_page_preview=True)
     else:
         bot.reply_to(message, "Вибачте, але ви ще не зареєстровані тому у вас нема доступу до цієї команди.\nБудь ласка, зареєструйтесь.")
-
 
 @bot.message_handler(commands=['next_day'])
 def next_day(message):
@@ -223,6 +224,7 @@ def next_day(message):
         today = datetime.datetime.now().astimezone(KYIV)
         tommorow = datetime.datetime(today.year, today.month, today.day) + datetime.timedelta(days=1)
         tommorow_str = tommorow.strftime("%Y-%m-%d %H:%m")
+        tommorow_text = ''
         end_str = (tommorow + datetime.timedelta(days=1)).strftime("%Y-%m-%d %H:%m")
         Cist_id = Database.search(message.chat.id)
         # Get the Unix timestamp of the day in Kyiv time
@@ -231,28 +233,31 @@ def next_day(message):
                                            tommorow_str,
                                            end_str
                                            )
-        Schedule = list(OrderedDict(((schedule['number_pair'],
-                                      schedule['teachers'][0]['id'] if schedule['teachers'] else 'no_teacher'),
-                                     schedule) for schedule in Schedule).values())
-        Schedule.sort(key=lambda lesson: lesson['start_time'])
-        tommorow_text = ''
-        for event in Schedule:
-            # pprint(event)
-            Start_time = datetime.datetime.fromtimestamp(int(event["start_time"])).astimezone(KYIV)
-            End_time = datetime.datetime.fromtimestamp(int(event["end_time"])).astimezone(KYIV)
-            Brief = event["subject"]["brief"]
-            Type = event["type"]
-            if (len(event["teachers"]) < 1):
-                Short_name = "Не визначено"
-            else:
-                Short_name = event["teachers"][0]["short_name"]
-            tommorow_text += f"{Start_time.strftime('%H:%M')} - {End_time.strftime('%H:%M')} | <b>{Brief} - {Type}</b> | {Short_name}\n"
-        # Send the date and Unix timestamp as a reply to the user
+        if (isinstance(Schedule, str)):
+            tommorow_text = 'Пар нема. Відпочивайте!\n'
+        else:
+            Schedule = list(OrderedDict(((schedule['number_pair'],
+                                          schedule['teachers'][0]['id'] if schedule['teachers'] else 'no_teacher'),
+                                         schedule) for schedule in Schedule).values())
+            Schedule.sort(key=lambda lesson: lesson['start_time'])
+            for event in Schedule:
+                # pprint(event)
+                Start_time = datetime.datetime.fromtimestamp(int(event["start_time"])).astimezone(KYIV)
+                End_time = datetime.datetime.fromtimestamp(int(event["end_time"])).astimezone(KYIV)
+                Brief = event["subject"]["brief"]
+                Type = event["type"]
+                if (len(event["teachers"]) < 1):
+                    Short_name = "Не визначено"
+                else:
+                    Short_name = event["teachers"][0]["short_name"]
+                tommorow_text += f"{Start_time.strftime('%H:%M')} - {End_time.strftime('%H:%M')} | <b>{Brief} - {Type}</b> | {Short_name}\n"
+            # Send the date and Unix timestamp as a reply to the user
+            parse_mode = 'html'
+            if (tommorow_text == ''):
+                tommorow_text = 'Пар нема. Відпочивайте!\n'
         parse_mode = 'html'
-        if (tommorow_text == ''):
-            today_text = 'Пар нема. Відпочивайте!\n'
-        bot.reply_to(message, f"Розклад на {tommorow.strftime('%Y-%m-%d')}\n{tommorow_text} {DonateHTML} ",
-                     parse_mode=parse_mode, disable_web_page_preview=True)
+        bot.reply_to(message, f"Розклад на {tommorow.strftime('%d.%m.%Y')}\n{tommorow_text} {DonateHTML} ",
+        parse_mode=parse_mode, disable_web_page_preview=True)
     else:
         bot.reply_to(message, "Вибачте, але ви ще не зареєстровані тому у вас нема доступу до цієї команди.\nБудь ласка, зареєструйтесь.")
 
@@ -288,25 +293,28 @@ def week(message):
                                                day_str,
                                                end_str
                                                )
-            Schedule = list(OrderedDict(((schedule['number_pair'],
-                                          schedule['teachers'][0]['id'] if schedule['teachers'] else 'no_teacher'),
-                                         schedule) for schedule in Schedule).values())
-            Schedule.sort(key=lambda lesson: lesson['start_time'])
-            # Add the date and the name of the day in Ukrainian with a capital letter and the first format
             day_text = f'{date_format} ({day_name_uk})\n'
-            for event in Schedule:
-                # pprint(event)
-                Start_time = datetime.datetime.fromtimestamp(int(event["start_time"])).astimezone(KYIV)
-                End_time = datetime.datetime.fromtimestamp(int(event["end_time"])).astimezone(KYIV)
-                Brief = event["subject"]["brief"]
-                Type = event["type"]
-                if (len(event["teachers"]) < 1):
-                    Short_name = "Не визначено"
-                else:
-                    Short_name = event["teachers"][0]["short_name"]
-                day_text += f"{Start_time.strftime('%H:%M')} - {End_time.strftime('%H:%M')} | <b>{Brief} - {Type}</b> | {Short_name}\n"
-            if (day_text == f'{date_format} ({day_name_uk})\n'):
+            if (isinstance(Schedule, str)):
                 day_text = day_text + 'Пар нема. Відпочивайте!\n'
+            else:
+                Schedule = list(OrderedDict(((schedule['number_pair'],
+                                              schedule['teachers'][0]['id'] if schedule['teachers'] else 'no_teacher'),
+                                             schedule) for schedule in Schedule).values())
+                Schedule.sort(key=lambda lesson: lesson['start_time'])
+                # Add the date and the name of the day in Ukrainian with a capital letter and the first format
+                for event in Schedule:
+                    # pprint(event)
+                    Start_time = datetime.datetime.fromtimestamp(int(event["start_time"])).astimezone(KYIV)
+                    End_time = datetime.datetime.fromtimestamp(int(event["end_time"])).astimezone(KYIV)
+                    Brief = event["subject"]["brief"]
+                    Type = event["type"]
+                    if (len(event["teachers"]) < 1):
+                        Short_name = "Не визначено"
+                    else:
+                        Short_name = event["teachers"][0]["short_name"]
+                    day_text += f"{Start_time.strftime('%H:%M')} - {End_time.strftime('%H:%M')} | <b>{Brief} - {Type}</b> | {Short_name}\n"
+                if (day_text == f'{date_format} ({day_name_uk})\n'):
+                    day_text = day_text + 'Пар нема. Відпочивайте!\n'
             day_text += "\n"
             week_str = week_str + day_text
         week_str = week_str + DonateHTML
@@ -319,9 +327,12 @@ def week(message):
 
 @bot.message_handler(commands=['next_week'])
 def Next_week(message):
+    print()
     if (Database.check_cist_id(message.chat.id)):
         # Get the Monday of next week in Kyiv time
-        next_monday = KYIV.localize(datetime.datetime.now()) + datetime.timedelta(days=7)
+        today = datetime.datetime.now().astimezone(KYIV)
+        monday = today - datetime.timedelta(days=today.weekday())
+        next_monday = monday + datetime.timedelta(days=7)
         # Get the week number
         week_num = next_monday.isocalendar()[1]
         Cist_id = Database.search(message.chat.id)
@@ -345,25 +356,28 @@ def Next_week(message):
                                                day_str,
                                                end_str
                                                )
-            Schedule = list(OrderedDict(((schedule['number_pair'],
-                                          schedule['teachers'][0]['id'] if schedule['teachers'] else 'no_teacher'),
-                                         schedule) for schedule in Schedule).values())
-            Schedule.sort(key=lambda lesson: lesson['start_time'])
-            # Add the date and the name of the day in Ukrainian with a capital letter and the first format
             day_text = f'{date_format} ({day_name_uk})\n'
-            for event in Schedule:
-                # pprint(event)
-                Start_time = datetime.datetime.fromtimestamp(int(event["start_time"])).astimezone(KYIV)
-                End_time = datetime.datetime.fromtimestamp(int(event["end_time"])).astimezone(KYIV)
-                Brief = event["subject"]["brief"]
-                Type = event["type"]
-                if (len(event["teachers"]) < 1):
-                    Short_name = "Не визначено"
-                else:
-                    Short_name = event["teachers"][0]["short_name"]
-                day_text += f"{Start_time.strftime('%H:%M')} - {End_time.strftime('%H:%M')} | <b>{Brief} - {Type}</b> | {Short_name}\n"
-            if (day_text == f'{date_format} ({day_name_uk})\n'):
+            if (isinstance(Schedule, str)):
                 day_text = day_text + 'Пар нема. Відпочивайте!\n'
+            else:
+                Schedule = list(OrderedDict(((schedule['number_pair'],
+                                              schedule['teachers'][0]['id'] if schedule['teachers'] else 'no_teacher'),
+                                             schedule) for schedule in Schedule).values())
+                Schedule.sort(key=lambda lesson: lesson['start_time'])
+                # Add the date and the name of the day in Ukrainian with a capital letter and the first format
+                for event in Schedule:
+                    # pprint(event)
+                    Start_time = datetime.datetime.fromtimestamp(int(event["start_time"])).astimezone(KYIV)
+                    End_time = datetime.datetime.fromtimestamp(int(event["end_time"])).astimezone(KYIV)
+                    Brief = event["subject"]["brief"]
+                    Type = event["type"]
+                    if (len(event["teachers"]) < 1):
+                        Short_name = "Не визначено"
+                    else:
+                        Short_name = event["teachers"][0]["short_name"]
+                    day_text += f"{Start_time.strftime('%H:%M')} - {End_time.strftime('%H:%M')} | <b>{Brief} - {Type}</b> | {Short_name}\n"
+                if (day_text == f'{date_format} ({day_name_uk})\n'):
+                    day_text = day_text + 'Пар нема. Відпочивайте!\n'
             day_text += "\n"
             week_str = week_str + day_text
         week_str = week_str + DonateHTML
