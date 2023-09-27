@@ -1,4 +1,5 @@
 import sqlite3
+import telegram
 from pprint import pprint
 
 
@@ -9,15 +10,38 @@ def check_chat_id_exists(chat_id):
 
     # Виконати запит до бази даних, щоб перевірити наявність записів за chat_id
     cursor.execute("SELECT COUNT(*) FROM users WHERE chat_id = ?", (chat_id, ))
-    count = cursor.fetchone()[0]
+    result = cursor.fetchone()
     # conn.commit()
     conn.close()
-    if count > 0:
+    if result is not None:
         return True
     else:
         return False
-
-import sqlite3
+def get_chat_ids():
+    conn = sqlite3.connect('my_database.db')
+    c = conn.cursor()
+    c.execute('SELECT chat_id FROM users')
+    chat_ids = []
+    for row in c.fetchall():
+        chat_ids.append(row[0])
+    conn.close()
+    return chat_ids
+def check_cist_id(chat_id):
+    # connect to the database
+    conn = sqlite3.connect("my_database.db")
+    # create a cursor object
+    cur = conn.cursor()
+    # execute a query to select the cist_id from the users table where chat_id matches
+    cur.execute("SELECT cist_id FROM users WHERE chat_id = ?", (chat_id,))
+    # fetch the result
+    result = cur.fetchone()
+    # close the connection
+    conn.close()
+    # check if the result is not None and return True or False accordingly
+    if result is not None:
+        return True
+    else:
+        return False
 
 def save_chat_id(message):
     # get the chat id from the message
@@ -28,7 +52,8 @@ def save_chat_id(message):
     c.execute("SELECT * FROM users WHERE chat_id = ?", (chat_id,))
     result = c.fetchone()
     if result is None:
-        c.execute("INSERT INTO users (chat_id) VALUES (?)", (chat_id,))
+        c.execute("INSERT INTO users (chat_id, chat_type, first_name, last_name, username) VALUES (?, ?, ?, ?, ?)",
+                  (chat_id, message.chat.type, message.chat.first_name, message.chat.last_name,  message.chat.username))
         conn.commit()
 
 def count_chats():
@@ -53,11 +78,14 @@ def count_chats():
   c.execute("SELECT COUNT(*) FROM users WHERE chat_type = 'group'")
   num_group_chats = c.fetchone()[0]
 
+  c.execute("SELECT COUNT(*) FROM users WHERE cist_id IS NULL")
+  num_none_chats = c.fetchone()[0]
+
   # Close the database connection.
   c.close()
   conn.close()
 
-  return num_private_chats, num_group_chats
+  return num_private_chats, num_group_chats, num_none_chats
 def update(Cist_name, Cist_id, Chat_type, First_name, Last_name, Username, Chat_id):
     conn = sqlite3.connect('my_database.db')  # Замініть 'your_database.db' на шлях до вашої бази даних
     cursor = conn.cursor()
@@ -85,7 +113,7 @@ def init():
     c = conn.cursor()
     # Create the table if it doesn't exist
     c.execute('''CREATE TABLE IF NOT EXISTS users (
-         chat_id INTEGER PRIMARY KEY,
+         chat_id INTEGER,
          cist_name TEXT,
          cist_id INTEGER,
          chat_type TEXT,
