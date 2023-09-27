@@ -177,7 +177,6 @@ def register(message):
 @bot.message_handler(commands=['day'])
 def day(message):
     if (Database.check_cist_id(message.chat.id)):
-        # Check if the bot status is True
         # Get the current date in Kyiv time
         today = datetime.datetime.now().astimezone(KYIV)
         today = datetime.datetime(today.year, today.month, today.day)
@@ -210,10 +209,10 @@ def day(message):
             parse_mode = 'html'
             if (today_text == ''):
                 today_text = 'Пар нема. Відпочивайте!\n'
-                bot.reply_to(message, f"Розклад на {today.strftime('%d.%m.%Y')}\n{today_text} {DonateHTML} ", parse_mode=parse_mode,
-                disable_web_page_preview=True)
-        else:
-            bot.reply_to(message, "Вибачте, але ви ще не зареєстровані тому у вас нема доступу до цієї команди.\nБудь ласка, зареєструйтесь.")
+            bot.reply_to(message, f"Розклад на {today.strftime('%d.%m.%Y')}\n{today_text} {DonateHTML} ", parse_mode=parse_mode,
+            disable_web_page_preview=True)
+    else:
+        bot.reply_to(message, "Вибачте, але ви ще не зареєстровані тому у вас нема доступу до цієї команди.\nБудь ласка, зареєструйтесь.")
 
 
 @bot.message_handler(commands=['next_day'])
