@@ -86,6 +86,9 @@ Database.init()
 
 def greet_user(messages):
     for message in messages:
+        if (not Database.check_chat_id_exists(message.chat.id)):
+            Database.save_chat_id(message)
+
         if (message.new_chat_members != None):
             for new_member in message.new_chat_members:
                 if (new_member.id == bot.get_me().id):
@@ -126,6 +129,9 @@ def statistics(message):
 
 @bot.message_handler(commands=['help'])
 def help(message):
+    if (not Database.check_chat_id_exists(message.chat.id)):
+        Database.save_chat_id(message)
+
     parse_mode = 'html'
     bot.send_message(message.chat.id,
                      f"Список команд бота: \n \n" +
@@ -147,6 +153,9 @@ def help(message):
 
 @bot.message_handler(commands=['choose'])
 def register(message):
+    if (not Database.check_chat_id_exists(message.chat.id)):
+        Database.save_chat_id(message)
+
     x = message.text.split()
     if (len(x) == 2):
        try:
@@ -176,6 +185,9 @@ def register(message):
 # Define a function to handle the /day command
 @bot.message_handler(commands=['day'])
 def day(message):
+    if (not Database.check_chat_id_exists(message.chat.id)):
+        Database.save_chat_id(message)
+
     if (Database.check_cist_id(message.chat.id)):
         # Get the current date in Kyiv time
         today = datetime.datetime.now().astimezone(KYIV)
@@ -218,6 +230,9 @@ def day(message):
 
 @bot.message_handler(commands=['next_day'])
 def next_day(message):
+    if (not Database.check_chat_id_exists(message.chat.id)):
+        Database.save_chat_id(message)
+
     if (Database.check_cist_id(message.chat.id)):
         # Check if the bot status is True
         # Get the current date in Kyiv time
@@ -265,6 +280,9 @@ def next_day(message):
 # Define a function to handle the /week command
 @bot.message_handler(commands=['week'])
 def week(message):
+    if (not Database.check_chat_id_exists(message.chat.id)):
+        Database.save_chat_id(message)
+
     if (Database.check_cist_id(message.chat.id)):
         # Check if the bot status is True
         # Get the Monday of this week in Kyiv time
@@ -327,7 +345,9 @@ def week(message):
 
 @bot.message_handler(commands=['next_week'])
 def Next_week(message):
-    print()
+    if (not Database.check_chat_id_exists(message.chat.id)):
+        Database.save_chat_id(message)
+
     if (Database.check_cist_id(message.chat.id)):
         # Get the Monday of next week in Kyiv time
         today = datetime.datetime.now().astimezone(KYIV)
