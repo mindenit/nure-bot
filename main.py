@@ -149,6 +149,7 @@ def help(message):
 def register(message):
     x = message.text.split()
     if (len(x) == 2):
+       try:
         Cist_name = x[1]
         Cist_id = nure_tools.find_group(Cist_name)["id"]
         Chat_id = message.chat.id
@@ -166,6 +167,8 @@ def register(message):
         else:
             Database.insert(Chat_id, Cist_name, Cist_id, Chat_type, First_name, Last_name, Username)
         bot.reply_to(message, f"Дякую {message.from_user.first_name} за реєстрацію")
+       except:
+           bot.reply_to(message, "Вибачте, але групу яку ви написали не існує")
     else:
         bot.reply_to(message, f"Sorry, not valid input. Please, try again")
 
