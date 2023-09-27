@@ -168,7 +168,7 @@ def register(message):
             Database.insert(Chat_id, Cist_name, Cist_id, Chat_type, First_name, Last_name, Username)
         bot.reply_to(message, f"Дякую {message.from_user.first_name} за реєстрацію, тепер у чат буде відправлятися розклад для групи {Cist_name}")
       except:
-        bot.reply_to(message, "Сталася помилка під час реєстрації, можливо бот не знайшов вашу групу, переконайтеся у корректності введених даних,і спробуйте ще раз.")
+        bot.reply_to(message, "Сталася помилка під час реєстрації, можливо бот не знайшов вашу групу, переконайтеся у корректності введених даних, і спробуйте ще раз.")
     else:
         bot.reply_to(message, f"Неправильне використання команди, передивіться довідку (/help) і спробуйте ще раз.")
 
