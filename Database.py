@@ -10,10 +10,10 @@ def check_chat_id_exists(chat_id):
 
     # Виконати запит до бази даних, щоб перевірити наявність записів за chat_id
     cursor.execute("SELECT COUNT(*) FROM users WHERE chat_id = ?", (chat_id, ))
-    result = cursor.fetchone()
+    result = cursor.fetchone()[0]
     # conn.commit()
     conn.close()
-    if result is not None:
+    if (result > 0):
         return True
     else:
         return False
