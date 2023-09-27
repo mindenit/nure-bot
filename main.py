@@ -190,7 +190,7 @@ def day(message):
                                             today_str,
                                             end_str
                                            )
-        Schedule = list(OrderedDict(((int(schedule['number_pair']),
+        Schedule = list(OrderedDict(((schedule['number_pair'],
                                     schedule['teachers'][0]['id'] if schedule['teachers'] else 'no_teacher'),
                                     schedule) for schedule in Schedule).values())
         Schedule.sort(key=lambda lesson: lesson['start_time'])
@@ -232,7 +232,7 @@ def next_day(message):
                                            tommorow_str,
                                            end_str
                                            )
-        Schedule = list(OrderedDict(((int(schedule['number_pair']),
+        Schedule = list(OrderedDict(((schedule['number_pair'],
                                       schedule['teachers'][0]['id'] if schedule['teachers'] else 'no_teacher'),
                                      schedule) for schedule in Schedule).values())
         Schedule.sort(key=lambda lesson: lesson['start_time'])
@@ -346,7 +346,7 @@ def Next_week(message):
                                                day_str,
                                                end_str
                                                )
-            Schedule = list(OrderedDict(((int(schedule['number_pair']),
+            Schedule = list(OrderedDict(((schedule['number_pair'],
                                           schedule['teachers'][0]['id'] if schedule['teachers'] else 'no_teacher'),
                                          schedule) for schedule in Schedule).values())
             Schedule.sort(key=lambda lesson: lesson['start_time'])
