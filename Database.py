@@ -69,16 +69,17 @@ def count_chats():
   c = conn.cursor()
 
   # Count the number of private chats.
-  c.execute("SELECT COUNT(*) FROM users WHERE chat_type = 'private'")
+  c.execute("SELECT COUNT(*) FROM users WHERE chat_type = 'private' AND cist_id IS NOT NULL")
   num_private_chats = c.fetchone()[0]
 
   # Count the number of group chats.
-  c.execute("SELECT COUNT(*) FROM users WHERE chat_type = 'group'")
+  c.execute("SELECT COUNT(*) FROM users WHERE chat_type = 'group' AND cist_id IS NOT NULL")
   num_group_chats = c.fetchone()[0]
 
-  c.execute("SELECT COUNT(*) FROM users WHERE chat_type = 'supergroup'")
+  c.execute("SELECT COUNT(*) FROM users WHERE chat_type = 'supergroup' AND cist_id IS NOT NULL")
   num_group_chats += c.fetchone()[0]
 
+  # Count the number of chats with no Cist_id.
   c.execute("SELECT COUNT(*) FROM users WHERE cist_id IS NULL")
   num_none_chats = c.fetchone()[0]
 
@@ -87,6 +88,7 @@ def count_chats():
   conn.close()
 
   return num_private_chats, num_group_chats, num_none_chats
+
 def update(Cist_name, Cist_id, Chat_type, First_name, Last_name, Username, Chat_id):
     conn = sqlite3.connect('my_database.db')  # Замініть 'your_database.db' на шлях до вашої бази даних
     cursor = conn.cursor()
