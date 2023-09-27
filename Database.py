@@ -10,13 +10,10 @@ def check_chat_id_exists(chat_id):
 
     # Виконати запит до бази даних, щоб перевірити наявність записів за chat_id
     cursor.execute("SELECT COUNT(*) FROM users WHERE chat_id = ?", (chat_id, ))
-    result = cursor.fetchone()[0]
+    result = bool(cursor.fetchone()[0])
     # conn.commit()
     conn.close()
-    if result is not None:
-        return True
-    else:
-        return False
+    return result
 def get_chat_ids():
     conn = sqlite3.connect('my_database.db')
     c = conn.cursor()
@@ -55,6 +52,7 @@ def save_chat_id(message):
         c.execute("INSERT INTO users (chat_id, chat_type, first_name, last_name, username) VALUES (?, ?, ?, ?, ?)",
                   (chat_id, message.chat.type, message.chat.first_name, message.chat.last_name,  message.chat.username))
         conn.commit()
+        conn.close()
 
 def count_chats():
   """Counts the number of private and group chats in the sqlite3 database at the given path.
