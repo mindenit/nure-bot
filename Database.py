@@ -10,7 +10,7 @@ def check_chat_id_exists(chat_id):
 
     # Виконати запит до бази даних, щоб перевірити наявність записів за chat_id
     cursor.execute("SELECT COUNT(*) FROM users WHERE chat_id = ?", (chat_id, ))
-    result = cursor.fetchone()
+    result = cursor.fetchone()[0]
     # conn.commit()
     conn.close()
     if result is not None:
@@ -34,7 +34,7 @@ def check_cist_id(chat_id):
     # execute a query to select the cist_id from the users table where chat_id matches
     cur.execute("SELECT cist_id FROM users WHERE chat_id = ?", (chat_id,))
     # fetch the result
-    result = cur.fetchone()
+    result = cur.fetchone()[0]
     # close the connection
     conn.close()
     # check if the result is not None and return True or False accordingly
@@ -77,6 +77,9 @@ def count_chats():
   # Count the number of group chats.
   c.execute("SELECT COUNT(*) FROM users WHERE chat_type = 'group'")
   num_group_chats = c.fetchone()[0]
+
+  c.execute("SELECT COUNT(*) FROM users WHERE chat_type = 'supergroup'")
+  num_group_chats += c.fetchone()[0]
 
   c.execute("SELECT COUNT(*) FROM users WHERE cist_id IS NULL")
   num_none_chats = c.fetchone()[0]
