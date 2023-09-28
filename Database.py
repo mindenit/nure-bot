@@ -1,5 +1,5 @@
 import sqlite3
-import telegram
+import telebot
 from pprint import pprint
 
 
@@ -39,6 +39,48 @@ def check_cist_id(chat_id):
         return True
     else:
         return False
+
+def info(message, bot):
+  """Displays all the information from the users table from the sqlite3 database associated with this chat_id.
+
+  Args:
+    message: The Telegram message object.
+    bot: The Telegram bot object.
+
+  Returns:
+    None
+  """
+
+  # Get the chat ID of the user who sent the message.
+  chat_id = message.chat.id
+
+  # Connect to the database.
+  conn = sqlite3.connect('my_database.db')
+
+  # Create a cursor object.
+  cur = conn.cursor()
+
+  # Execute the SQL query to select all users from the users table where the chat_id matches the given chat_id.
+  cur.execute('SELECT * FROM users WHERE chat_id = ?', (chat_id,))
+
+  # Fetch the first row of the result set.
+  user = cur.fetchone()
+
+  # If the list `user` is empty, then there are no users in the database with the given chat ID.
+  if not user:
+    bot.reply_to(message, "There are no users in the database with that chat ID.")
+    return
+
+  # Create a copy of the list `user` so that it is not modified after the query is executed.
+  user_copy = user[:]
+
+  # Close the cursor and connection.
+  cur.close()
+  conn.close()
+
+  # Display the user information.
+  bot.reply_to(message, f"""Chat id: {user_copy[0]}\nName of the group: {user_copy[1]}\nCist id: {user_copy[2]}\nChat type: {user_copy[3]}\nFirst name: {user_copy[4]}\nLast name: {user_copy[5]}\nUsername: {user_copy[6]}""")
+
 
 def save_chat_id(message):
     # get the chat id from the message

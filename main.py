@@ -64,6 +64,13 @@ with open("Token", "r") as f:
 # Create a bot object with the bot token
 bot = telebot.TeleBot(bot_token)
 
+@bot.message_handler(commands=['info'])
+def info(message):
+    if (Database.check_cist_id(message.chat.id)):
+        Database.info(message, bot)
+    else:
+        bot.reply_to(message,"Вибачте, але ви ще не зареєстровані тому у вас нема доступу до цієї команди.\nБудь ласка, зареєструйтесь.")
+
 @bot.message_handler(commands=['notify'])
 def notify(message):
     # Get all the chat ids from the bot
