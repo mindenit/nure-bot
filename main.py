@@ -10,61 +10,62 @@ import Database
 from collections import OrderedDict
 import locale
 import os
-try:
-    locale.setlocale(locale.LC_ALL, 'uk_UA.UTF-8')
+import requests
 
-    KYIV = timezone('Europe/Kyiv')
-    DonateHTML = "\n" + "<a href=\"https://t.me/nure_dev\">Канал з інфою</a> | " + "<a href=\"https://send.monobank.ua/jar/5tHDuV8dfg\">Підтримати розробку</a> | " + "<a href=\"https://t.me/ketronix_dev\">Адмін</a> | " + "<a href=\"https://github.com/nure-dev/nure-cist-bot\">Код</a>" + "\n"
-    # Read the bot's token from the file "Token"
-    def request_token():
-      """Requests a token from the user and writes it to the Token file.
+KYIV = timezone('Europe/Kyiv')
+locale.setlocale(locale.LC_ALL, 'uk_UA.UTF-8')
+DonateHTML = "\n" + "<a href=\"https://t.me/nure_dev\">Канал з інфою</a> | " + "<a href=\"https://send.monobank.ua/jar/5tHDuV8dfg\">Підтримати розробку</a> | " + "<a href=\"https://t.me/ketronix_dev\">Адмін</a> | " + "<a href=\"https://github.com/nure-dev/nure-cist-bot\">Код</a>" + "\n"
+def request_token():
+    """Requests a token from the user and writes it to the Token file.
 
-      Returns:
-        True if the file was created, False otherwise.
-      """
+    Returns:
+      True if the file was created, False otherwise.
+    """
 
-      if os.path.exists("Token"):
-          return False
-
-      token = input("Enter your token: ")
-      with open("Token", "w") as f:
-        f.write(token)
-      return True
-
-    def create_admin_file():
-      """Creates an Admin_id file if it does not already exist.
-
-      Returns:
-        True if the file was created, False otherwise.
-      """
-
-      if os.path.exists("Admin_id"):
+    if os.path.exists("Token"):
         return False
 
-      with open("Admin_id", "w") as f:
+    token = input("Enter your token: ")
+    with open("Token", "w") as f:
+        f.write(token)
+    return True
+
+
+def create_admin_file():
+    """Creates an Admin_id file if it does not already exist.
+
+    Returns:
+      True if the file was created, False otherwise.
+    """
+
+    if os.path.exists("Admin_id"):
+        return False
+
+    with open("Admin_id", "w") as f:
         num_admins = int(input("Enter the number of admins: "))
         for i in range(num_admins):
-          admin_id = input("Enter the ID of admin {}: ".format(i + 1))
-          f.write("\n{}".format(admin_id))
-      return True
+            admin_id = input("Enter the ID of admin {}: ".format(i + 1))
+            f.write("\n{}".format(admin_id))
+    return True
 
-    if __name__ == "__main__":
-      if request_token():
+
+if __name__ == "__main__":
+    if request_token():
         print("Token file created successfully!")
-      else:
+    else:
         print("Token file already exists.")
 
-    if __name__ == "__main__":
-      if create_admin_file():
+if __name__ == "__main__":
+    if create_admin_file():
         print("Admin_id file created successfully!")
-      else:
+    else:
         print("Admin_id file already exists.")
 
-    with open("Token", "r") as f:
-        bot_token = f.read()
-    # Create a bot object with the bot token
-    bot = telebot.TeleBot(bot_token)
-
+with open("Token", "r") as f:
+    bot_token = f.read()
+# Create a bot object with the bot token
+bot = telebot.TeleBot(bot_token)
+try:
     @bot.message_handler(commands=['info'])
     def info(message):
         if (Database.check_cist_id(message.chat.id)):
@@ -90,8 +91,13 @@ try:
 
 
     Database.init()
-
-
+    def find_group (name):
+        groups_respond = requests.get('https://nure-dev.pp.ua/api/groups')
+        groups = groups_respond.json()
+        pprint(groups)
+        for element in groups:
+            if element["name"] == name:
+                return element.id
     def greet_user(messages):
         for message in messages:
             if (not Database.check_chat_id_exists(message.chat.id)):
@@ -163,12 +169,11 @@ try:
     def register(message):
         if (not Database.check_chat_id_exists(message.chat.id)):
             Database.save_chat_id(message)
-
         x = message.text.split()
         if (len(x) == 2):
            try:
             Cist_name = x[1]
-            Cist_id = nure_tools.find_group(Cist_name)["id"]
+            Cist_id = find_group(Cist_name)
             Chat_id = message.chat.id
             Chat_type = message.chat.type
             if (Chat_type == 'private'):
@@ -419,9 +424,8 @@ try:
     def save_chat_id(message):
         Database.save_chat_id(message)
 
-
-    # Start the bot
-    bot.polling()
 except:
     with open("Error", "a") as f:
         f.write(sys.exc_info()[1].__str__() + "\n")
+
+bot.polling()
