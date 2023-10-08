@@ -14,7 +14,7 @@ import requests
 
 KYIV = timezone('Europe/Kyiv')
 locale.setlocale(locale.LC_ALL, 'uk_UA.UTF-8')
-DonateHTML = "\n" + "<a href=\"https://t.me/nure_dev\">Канал з інфою</a> | " + "<a href=\"https://send.monobank.ua/jar/5tHDuV8dfg\">Підтримати розробку</a> | " + "<a href=\"https://t.me/ketronix_dev\">Адмін</a> | " + "<a href=\"https://github.com/nure-dev/nure-cist-bot\">Код</a>" + "\n"
+DonateHTML = "\n" + "<a href=\"https://t.me/nure_dev\">Канал з інфою</a> | " + "<a href=\"https://send.monobank.ua/jar/5tHDuV8dfg\">Підтримати розробку</a> | " + "<a href=\"https://t.me/ketronix_dev\">Адмін</a> | " + "<a href=\"https://github.com/nure-dev/nure-bot\">Код</a>" + "\n"
 def request_token():
     """Requests a token from the user and writes it to the Token file.
 
@@ -94,10 +94,9 @@ try:
     def find_group (name):
         groups_respond = requests.get('https://nure-dev.pp.ua/api/groups')
         groups = groups_respond.json()
-        pprint(groups)
         for element in groups:
             if element["name"] == name:
-                return element.id
+                return element["id"]
     def greet_user(messages):
         for message in messages:
             if (not Database.check_chat_id_exists(message.chat.id)):
@@ -428,4 +427,4 @@ except:
     with open("Error", "a") as f:
         f.write(sys.exc_info()[1].__str__() + "\n")
 
-bot.polling()
+bot.infinity_polling(timeout=50, long_polling_timeout=20)
