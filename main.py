@@ -202,7 +202,7 @@ try:
 
         if (Database.check_cist_id(message.chat.id)):
             # Get the current date in Kyiv time
-            today = datetime.datetime.now().astimezone(KYIV)
+            today = datetime.datetime.now()
             today = datetime.datetime(today.year, today.month, today.day)
             today_text = ''
             today_str = today.strftime("%Y-%m-%d %H:%m")
@@ -223,8 +223,8 @@ try:
                 Schedule.sort(key=lambda lesson: lesson['start_time'])
                 for event in Schedule:
                     # pprint(event)
-                    Start_time = datetime.datetime.fromtimestamp(int(event["start_time"])).astimezone(KYIV)
-                    End_time = datetime.datetime.fromtimestamp(int(event["end_time"])).astimezone(KYIV)
+                    Start_time = datetime.datetime.fromtimestamp(int(event["start_time"]))
+                    End_time = datetime.datetime.fromtimestamp(int(event["end_time"]))
                     Brief = event["subject"]["brief"]
                     Type = event["type"]
                     if (len(event["teachers"]) < 1):
@@ -248,7 +248,7 @@ try:
         if (Database.check_cist_id(message.chat.id)):
             # Check if the bot status is True
             # Get the current date in Kyiv time
-            today = datetime.datetime.now().astimezone(KYIV)
+            today = datetime.datetime.now()
             tommorow = datetime.datetime(today.year, today.month, today.day) + datetime.timedelta(days=1)
             tommorow_str = tommorow.strftime("%Y-%m-%d %H:%m")
             tommorow_text = ''
@@ -269,8 +269,8 @@ try:
                 Schedule.sort(key=lambda lesson: lesson['start_time'])
                 for event in Schedule:
                     # pprint(event)
-                    Start_time = datetime.datetime.fromtimestamp(int(event["start_time"])).astimezone(KYIV)
-                    End_time = datetime.datetime.fromtimestamp(int(event["end_time"])).astimezone(KYIV)
+                    Start_time = datetime.datetime.fromtimestamp(int(event["start_time"]))
+                    End_time = datetime.datetime.fromtimestamp(int(event["end_time"]))
                     Brief = event["subject"]["brief"]
                     Type = event["type"]
                     if (len(event["teachers"]) < 1):
@@ -298,7 +298,7 @@ try:
         if (Database.check_cist_id(message.chat.id)):
             # Check if the bot status is True
             # Get the Monday of this week in Kyiv time
-            current_day = datetime.datetime.now().astimezone(KYIV)
+            current_day = datetime.datetime.now()
             monday = current_day - datetime.timedelta(days=current_day.weekday())
             # Get the week number
             week_num = monday.isocalendar()[1]
@@ -334,8 +334,8 @@ try:
                     # Add the date and the name of the day in Ukrainian with a capital letter and the first format
                     for event in Schedule:
                         # pprint(event)
-                        Start_time = datetime.datetime.fromtimestamp(int(event["start_time"])).astimezone(KYIV)
-                        End_time = datetime.datetime.fromtimestamp(int(event["end_time"])).astimezone(KYIV)
+                        Start_time = datetime.datetime.fromtimestamp(int(event["start_time"]))
+                        End_time = datetime.datetime.fromtimestamp(int(event["end_time"]))
                         Brief = event["subject"]["brief"]
                         Type = event["type"]
                         if (len(event["teachers"]) < 1):
@@ -362,7 +362,7 @@ try:
 
         if (Database.check_cist_id(message.chat.id)):
             # Get the Monday of next week in Kyiv time
-            today = datetime.datetime.now().astimezone(KYIV)
+            today = datetime.datetime.now()
             monday = today - datetime.timedelta(days=today.weekday())
             next_monday = monday + datetime.timedelta(days=7)
             # Get the week number
@@ -399,8 +399,8 @@ try:
                     # Add the date and the name of the day in Ukrainian with a capital letter and the first format
                     for event in Schedule:
                         # pprint(event)
-                        Start_time = datetime.datetime.fromtimestamp(int(event["start_time"])).astimezone(KYIV)
-                        End_time = datetime.datetime.fromtimestamp(int(event["end_time"])).astimezone(KYIV)
+                        Start_time = datetime.datetime.fromtimestamp(int(event["start_time"]))
+                        End_time = datetime.datetime.fromtimestamp(int(event["end_time"]))
                         Brief = event["subject"]["brief"]
                         Type = event["type"]
                         if (len(event["teachers"]) < 1):
